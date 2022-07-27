@@ -1,0 +1,36 @@
+{
+  "data": {
+    "figer": {
+      "figerText": "data/exp.txt",
+      "figerLabel": "data/exp.label",
+      "figerClasses": "data/paper_labels.txt",
+      "newShuffles": false,
+      "figerShuffles": "data/figer_shuffles.json",
+      "randseed": 42
+
+    },
+    "hands": {
+      "fner_dev": "data/fner_dev_array.json",
+      "fner_test": "data/fner_test_array.json",
+      "wfb_all": "data/1k-WFB-g_complete_array.json",
+      "trainpath": "data/HAnDS_figer_types_stage_one_state_two_sentences_stage_three_pp/",
+      "newShuffles": false,
+      "handsShuffles": "data/hands_shuffles.json"
+
+    }
+  },
+  "output": {
+    "figer": {
+      "figerQA": "data/output/figerQA.json",
+      "figerGold": "data/output/figerGold.json",
+      "fqa_train": "data/output/fqa_train.json",
+      "fqa_dev": "data/output/fqa_dev.json",
+      "fqa_test": "data/output/fqa_test.json"
+    },
+    "hands": {
+      "handsDevQA": "data/output/handsDevQA.json",
+      "handsEvalAllQA": "data/output/handsEvalAllQA.json"
+    }
+
+  }
+}
