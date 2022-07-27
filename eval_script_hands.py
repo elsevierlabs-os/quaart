@@ -262,6 +262,10 @@ for thresh in thresholds:
                 entities.append(entity)
                 entTypes[tuple(entity)] = etype.split(',')
                 entity = [-1,-1]
+        if entity != [-1,-1]:
+            entities.append(entity)
+            entTypes[tuple(entity)] = etype.split(',')
+            entity = [-1,-1]
         sub = figer_submit[bidx]
 
         subEntities = []
@@ -281,6 +285,11 @@ for thresh in thresholds:
                 subEntities.append(subEntity)
                 subTypes[tuple(subEntity)] = stype.rstrip(',').split(',')
                 subEntity = [-1,-1]
+        if subEntity != [-1,-1]:
+            subEntities.append(subEntity)
+            subTypes[tuple(subEntity)] = stype.rstrip(',').split(',')
+            subEntity = [-1,-1]
+
         matches += len(set([tuple(e) for e in entities]).intersection(set(tuple(s) for s in subEntities)))
         matchTuples = list(set([tuple(e) for e in entities]).intersection(set(tuple(s) for s in subEntities)))
         for t in matchTuples:
