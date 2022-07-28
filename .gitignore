@@ -1,0 +1,7 @@
+*.csv
+*.txt
+*.log
+*.bak
+.idea/
+__pycache__/
+data/
