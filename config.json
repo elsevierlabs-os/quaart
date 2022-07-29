@@ -1,8 +1,8 @@
 {
   "data": {
     "figer": {
-      "figerText": "data/exp.txt",
-      "figerLabel": "data/exp.label",
+      "figerText": "data/output/exp.txt",
+      "figerLabel": "data/output/exp.label",
       "figerClasses": "data/paper_labels.txt",
       "newShuffles": false,
       "figerShuffles": "data/figer_shuffles.json",
@@ -10,12 +10,12 @@
 
     },
     "hands": {
-      "fner_texts": "data/fner_texts_all_test.txt",
-      "fner_labels": "data/fner_labels_all_test.txt",
-      "fner_dev": "data/fner_dev_array.json",
-      "fner_test": "data/fner_test_array.json",
-      "wfb_all": "data/1k-WFB-g_complete_array.json",
-      "trainpath": "data/HAnDS_figer_types_stage_one_state_two_sentences_stage_three_pp/",
+      "fner_texts": "data/output/fner_texts_all_test.txt",
+      "fner_labels": "data/output/fner_labels_all_test.txt",
+      "fner_dev": "data/outpu/fner_dev_array.json",
+      "fner_test": "data/output/fner_test_array.json",
+      "wfb_all": "data/output/1k-WFB-g_complete_array.json",
+      "trainpath": "data/output/HAnDS_figer_types_stage_one_state_two_sentences_stage_three_pp/",
       "newShuffles": false,
       "handsShuffles": "data/hands_shuffles.json"
 
