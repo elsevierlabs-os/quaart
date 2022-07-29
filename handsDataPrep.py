@@ -5,10 +5,6 @@ from sklearn.model_selection import train_test_split
 import gdown
 
 # a file
-url = "https://drive.google.com/uc?id=1WnV5gdichlXt9MNJAnL3bqtRx18W0ehd"
-output = config["data"]["hands"]["trainpath"]+".tar.gz"
-gdown.download(url, output, quiet=False)
-
 
 with open('config.json') as cf_file:
     config = json.loads( cf_file.read() )
@@ -25,6 +21,36 @@ with open(config["data"]["hands"]["wfb_all"], 'r') as json_file:
 filenames = []
 trainpath = config["data"]["hands"]["trainpath"]
 
+# Build source data used by evaluation scripss
+fner_texts = []
+fner_labels = []
+#for hands in [fner_dev[0]]:
+for hands in wfb_all:
+    fner_text = ""
+    for idx, token in enumerate(hands["tokens"]):
+        isEnt = False
+        fner_text+=token+" "
+        for mention in hands["mentions"]:
+            if idx == mention["start"]:
+                isEnt = True
+                fner_labels.append(token+"\tB-"+",".join(mention["labels"]))
+            elif idx > mention["start"] and idx < mention["end"]:
+                isEnt = True
+                fner_labels.append(token+"\tI-"+",".join(mention["labels"]))
+        if isEnt == False:
+            fner_labels.append(token+"\tO")
+    fner_labels.append("\t")
+    fner_texts.append(fner_text)
+
+with open(config["data"]["hands"]["fner_texts"], 'w') as fp:
+    for item in fner_texts:
+        # write each item on a new line
+        fp.write("%s\n" % item)
+
+with open(config["data"]["hands"]["fner_labels"], 'w') as fp:
+    for item in fner_labels:
+        # write each item on a new line
+        fp.write("%s\n" % item)
 
 print("Building type list from all training data -- this will take a while.")
 for dirname in os.listdir(trainpath):
@@ -43,121 +69,121 @@ for fn in filenames:
             for label in ent["labels"]:
                 if label not in allTypes:
                     allTypes.append(label)
-#
-# print("Generating hands fner_dev data.")
-# handsDev = {"version": "v2.0", "data": []}
-# qCount = 1
-# for hands in fner_dev:
-#     #print(hands)
-#     context = ""
-#     title = str(hands["fileid"])+":"+str(hands["pid"])+":"+str(hands["senid"])
-#     labels = {}
-#     for token in hands["tokens"]:
-#         context += token + " "
-#     for ent in hands["mentions"]:
-#         start = ent["start"]
-#         text = ent["name"]
-#         for label in ent["labels"]:
-#             labels[label] = (start, text)
-#     for t in allTypes:
-#         labelParts = t.split("/")
-#         macro = labelParts[1]
-#         micro = labelParts[-1].replace("_"," ")
-#         if macro == "person":
-#             qStart = "Who "
-#         elif macro == "location":
-#             qStart = "Where "
-#         else:
-#             qStart = "What "
-#         if t not in labels.keys():
-#             #print(t)
-#             handsDev["data"].append({"id": str(qCount),
-#                                        "title": title,
-#                                        "context": context,
-#                                        "question": qStart + "was the " + micro + "?",
-#                                        "answers": {"answer_start": [], "text": []},
-#                                        "isImpossible": True})
-#         else:
-#             # Actually, gotta convert this to token number to char number
-#             #
-#             s = labels[t][0]
-#             charstart = 0
-#             toks = context.split(" ")
-#             for tok in toks[:s]:
-#                 charstart += len(tok)+1
-# #             print(s)
-# #             print(charstart)
-# #             q["answers"]["answer_start"][0] = charstart
-#             handsDev["data"].append({"id": str(qCount),
-#                                        "title": title,
-#                                        "context": context,
-#                                        "question": qStart + "was the " + micro + "?",
-#                                        "answers": {
-#                                            "answer_start": [charstart],
-#                                            "text": [labels[t][1]]},
-#                                        "isImpossible": False})
-#
-#         qCount+=1
-#
-# with open(config["output"]["hands"]["handsDevQA"], 'w') as f:
-#     json.dump(handsDev, f)
-#
-# print("Generating full hands evaluation set.")
-# handsEvalAll = {"version": "v2.0", "data": []}
-# qCount = 1
-# for hands in wfb_all:
-#     context = ""
-#     title = str(hands["fileid"])+":"+str(hands["pid"])+":"+str(hands["senid"])
-#     labels = {}
-#     for token in hands["tokens"]:
-#         context += token + " "
-#     for ent in hands["mentions"]:
-#         start = ent["start"]
-#         text = ent["name"]
-#         for label in ent["labels"]:
-#             labels[label] = (start, text)
-#     for t in allTypes:
-#         labelParts = t.split("/")
-#         macro = labelParts[1]
-#         micro = labelParts[-1].replace("_"," ")
-#         if macro == "person":
-#             qStart = "Who "
-#         elif macro == "location":
-#             qStart = "Where "
-#         else:
-#             qStart = "What "
-#         if t not in labels.keys():
-#             #print(t)
-#             handsEvalAll["data"].append({"id": str(qCount),
-#                                        "title": title,
-#                                        "context": context,
-#                                        "question": qStart + "was the " + micro + "?",
-#                                        "answers": {"answer_start": [], "text": []},
-#                                        "isImpossible": True})
-#         else:
-#             # Actually, gotta convert this to token number to char number
-#             #
-#             s = labels[t][0]
-#             charstart = 0
-#             toks = context.split(" ")
-#             for tok in toks[:s]:
-#                 charstart += len(tok)+1
-# #             print(s)
-# #             print(charstart)
-# #             q["answers"]["answer_start"][0] = charstart
-#             handsEvalAll["data"].append({"id": str(qCount),
-#                                        "title": title,
-#                                        "context": context,
-#                                        "question": qStart + "was the " + micro + "?",
-#                                        "answers": {
-#                                            "answer_start": [charstart],
-#                                            "text": [labels[t][1]]},
-#                                        "isImpossible": False})
-#
-#         qCount+=1
-#
-# with open(config["output"]["hands"]["handsEvalAllQA"], 'w') as f:
-#     json.dump(handsEvalAll, f)
+
+print("Generating hands fner_dev data.")
+handsDev = {"version": "v2.0", "data": []}
+qCount = 1
+for hands in fner_dev:
+    #print(hands)
+    context = ""
+    title = str(hands["fileid"])+":"+str(hands["pid"])+":"+str(hands["senid"])
+    labels = {}
+    for token in hands["tokens"]:
+        context += token + " "
+    for ent in hands["mentions"]:
+        start = ent["start"]
+        text = ent["name"]
+        for label in ent["labels"]:
+            labels[label] = (start, text)
+    for t in allTypes:
+        labelParts = t.split("/")
+        macro = labelParts[1]
+        micro = labelParts[-1].replace("_"," ")
+        if macro == "person":
+            qStart = "Who "
+        elif macro == "location":
+            qStart = "Where "
+        else:
+            qStart = "What "
+        if t not in labels.keys():
+            #print(t)
+            handsDev["data"].append({"id": str(qCount),
+                                       "title": title,
+                                       "context": context,
+                                       "question": qStart + "was the " + micro + "?",
+                                       "answers": {"answer_start": [], "text": []},
+                                       "isImpossible": True})
+        else:
+            # Actually, gotta convert this to token number to char number
+            #
+            s = labels[t][0]
+            charstart = 0
+            toks = context.split(" ")
+            for tok in toks[:s]:
+                charstart += len(tok)+1
+#             print(s)
+#             print(charstart)
+#             q["answers"]["answer_start"][0] = charstart
+            handsDev["data"].append({"id": str(qCount),
+                                       "title": title,
+                                       "context": context,
+                                       "question": qStart + "was the " + micro + "?",
+                                       "answers": {
+                                           "answer_start": [charstart],
+                                           "text": [labels[t][1]]},
+                                       "isImpossible": False})
+
+        qCount+=1
+
+with open(config["output"]["hands"]["handsDevQA"], 'w') as f:
+    json.dump(handsDev, f)
+
+print("Generating full hands evaluation set.")
+handsEvalAll = {"version": "v2.0", "data": []}
+qCount = 1
+for hands in wfb_all:
+    context = ""
+    title = str(hands["fileid"])+":"+str(hands["pid"])+":"+str(hands["senid"])
+    labels = {}
+    for token in hands["tokens"]:
+        context += token + " "
+    for ent in hands["mentions"]:
+        start = ent["start"]
+        text = ent["name"]
+        for label in ent["labels"]:
+            labels[label] = (start, text)
+    for t in allTypes:
+        labelParts = t.split("/")
+        macro = labelParts[1]
+        micro = labelParts[-1].replace("_"," ")
+        if macro == "person":
+            qStart = "Who "
+        elif macro == "location":
+            qStart = "Where "
+        else:
+            qStart = "What "
+        if t not in labels.keys():
+            #print(t)
+            handsEvalAll["data"].append({"id": str(qCount),
+                                       "title": title,
+                                       "context": context,
+                                       "question": qStart + "was the " + micro + "?",
+                                       "answers": {"answer_start": [], "text": []},
+                                       "isImpossible": True})
+        else:
+            # Actually, gotta convert this to token number to char number
+            #
+            s = labels[t][0]
+            charstart = 0
+            toks = context.split(" ")
+            for tok in toks[:s]:
+                charstart += len(tok)+1
+#             print(s)
+#             print(charstart)
+#             q["answers"]["answer_start"][0] = charstart
+            handsEvalAll["data"].append({"id": str(qCount),
+                                       "title": title,
+                                       "context": context,
+                                       "question": qStart + "was the " + micro + "?",
+                                       "answers": {
+                                           "answer_start": [charstart],
+                                           "text": [labels[t][1]]},
+                                       "isImpossible": False})
+
+        qCount+=1
+
+with open(config["output"]["hands"]["handsEvalAllQA"], 'w') as f:
+    json.dump(handsEvalAll, f)
 
 # Build our training data cycles from a subset of the full training data.
 # Start by selecting subset of the files:

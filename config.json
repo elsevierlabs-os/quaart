@@ -10,6 +10,8 @@
 
     },
     "hands": {
+      "fner_texts": "data/fner_texts_all_test.txt",
+      "fner_labels": "data/fner_labels_all_test.txt",
       "fner_dev": "data/fner_dev_array.json",
       "fner_test": "data/fner_test_array.json",
       "wfb_all": "data/1k-WFB-g_complete_array.json",
