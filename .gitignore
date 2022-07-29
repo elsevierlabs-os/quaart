@@ -4,4 +4,4 @@
 *.bak
 .idea/
 __pycache__/
-data/
+!paper_labels.txt

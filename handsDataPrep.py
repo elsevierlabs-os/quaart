@@ -1,8 +1,14 @@
-import json
 import gzip
 import os
 import json
 from sklearn.model_selection import train_test_split
+import gdown
+
+# a file
+url = "https://drive.google.com/uc?id=1WnV5gdichlXt9MNJAnL3bqtRx18W0ehd"
+output = config["data"]["hands"]["trainpath"]+".tar.gz"
+gdown.download(url, output, quiet=False)
+
 
 with open('config.json') as cf_file:
     config = json.loads( cf_file.read() )

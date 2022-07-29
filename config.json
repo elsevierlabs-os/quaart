@@ -25,11 +25,13 @@
       "figerGold": "data/output/figerGold.json",
       "fqa_train": "data/output/fqa_train.json",
       "fqa_dev": "data/output/fqa_dev.json",
-      "fqa_test": "data/output/fqa_test.json"
+      "fqa_test": "data/output/fqa_test.json",
+      "fqa_exp": "data/output/fqa_train/"
     },
     "hands": {
       "handsDevQA": "data/output/handsDevQA.json",
-      "handsEvalAllQA": "data/output/handsEvalAllQA.json"
+      "handsEvalAllQA": "data/output/handsEvalAllQA.json",
+      "hands_exp": "data/output/hands_train/"
     }
 
   }

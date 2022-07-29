@@ -246,10 +246,10 @@ if config["data"]["figer"]["newShuffles"] == False:
     with open(figerShufflesFile) as fs_file:
         figerShuffles = json.loads(fs_file.read())
     for k,v in figerShuffles.items():
-        filename = "data/fqa_train/fqa_train_gold_"+k+".json"
+        filename = config["output"]["figer"]["fqa_exp"] + "fqa_train_gold_"+k+".json"
         gold_array = []
         #print(v)
-        for title in v:
+        for title in v
             for q in fqa_train_gold["data"]:
                 if q["title"] == title:
                 # if q["title"] in v:
@@ -286,7 +286,7 @@ elif config["data"]["figer"]["newShuffles"] == True:
             # print(len(gold_array))
             # print(43*6*counter)
             fqa_train_increment = {'version': 'v2.0', 'data': gold_array}
-            filename = "data/fqa_train/fqa_train_gold_"  + str(counter) + letter + ".json"
+            filename = config["output"]["figer"]["fqa_exp"] + fqa_train_gold_"  + str(counter) + letter + ".json"
             with open(filename, 'w') as f:
                 json.dump(fqa_train_increment, f)
             counter += 1
