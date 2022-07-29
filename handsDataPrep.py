@@ -21,6 +21,8 @@ with open(config["data"]["hands"]["wfb_all"], 'r') as json_file:
 filenames = []
 trainpath = config["data"]["hands"]["trainpath"]
 
+print("Processing HAnDS data")
+print("Building source data used by evaluation scripts")
 # Build source data used by evaluation scripss
 fner_texts = []
 fner_labels = []
@@ -185,6 +187,7 @@ for hands in wfb_all:
 with open(config["output"]["hands"]["handsEvalAllQA"], 'w') as f:
     json.dump(handsEvalAll, f)
 
+print("Building shuffled training data for experiment 1")
 # Build our training data cycles from a subset of the full training data.
 # Start by selecting subset of the files:
 randseed = config["data"]["figer"]["randseed"]
@@ -223,7 +226,7 @@ for fn in hands_f_train:
         train_f_pidsiddids.append(pidsiddid)
 
 hands_c_train, hands_c_test = train_test_split(train_f_pidsiddids,test_size=0.9995, random_state=42)
-print(len(hands_c_train))
+#print(len(hands_c_train))
 
 filecount = 0
 hands_train_larger = []
@@ -236,9 +239,9 @@ for fn in hands_f_train:
         if pidsiddid in hands_c_train:
             hands_train_larger.append(result)
     filecount += 1
-    print(filecount)
-    print(fn)
-    print(len(hands_train_larger))
+    #print(filecount)
+    #print(fn)
+    #print(len(hands_train_larger))
 
 handsTrainLarger = {"version": "v2.0", "data": []}
 qCount = 1
@@ -290,19 +293,19 @@ for hands in hands_train_larger:
         qCount+=1
 
 if config["data"]["hands"]["newShuffles"] == False:
-    print("false")
+    #print("false")
     handsShufflesFile = config["data"]["hands"]["handsShuffles"]
     with open(handsShufflesFile) as fs_file:
         handsShuffles = json.loads(fs_file.read())
     for k,v in handsShuffles.items():
         #if k == "hands_train_gold_nines_1a.json":
-            filename = "data/hands_train/"+k+".json"
+            filename = config["output"]["hands"]["hands_exp"]+k
             gold_array = []
             #print(v)
             for title in v:
-                print(title)
+                #print(title)
                 for q in handsTrainLarger["data"]:
-                    print(q["title"])
+                    #print(q["title"])
                     if q["title"] == title:
                     # if q["title"] in v:
                         #print(q["title"])
@@ -344,7 +347,7 @@ if config["data"]["hands"]["newShuffles"] == False:
                                 entCount += 1
                                 for label in ent["labels"]:
                                     if label in missingTypes5a:
-                                        print(label)
+                                        #print(label)
                                         extraJson5a.append(result)
                                         missingTypes5a.remove(label)
                 hands_train_increment = hands5a.copy()

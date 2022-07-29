@@ -16,7 +16,7 @@ then
     cat data/output/fner_test.json | jq -cs '.' > data/output/fner_test_array.json
     cat data/output/1k-WFB-g_complete.json | jq -cs '.' > data/output/1k-WFB-g_complete_array.json
     python hands_gdown.py
-    tar -xvfz data/output/HAnDS_figer_types_stage_one_state_two_sentences_stage_three_pp.tar.gz -C data/output/
+    tar -xvf data/output/HAnDS_figer_types_stage_one_state_two_sentences_stage_three_pp.tar.gz -C data/output/
     echo "Download complete"
 else
     echo "data/output exists - delete to redownolad"

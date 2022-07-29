@@ -16,7 +16,8 @@ with open (config["data"]["figer"]["figerText"], 'r') as f:
 
 with open(config["data"]["figer"]["figerLabel"], 'r') as f:
     figerLabel = f.read().splitlines()
-
+print("Processing FIGER data")
+print("Bulding main figer QA data files")
 # Okay, this is the main bit that's collecting the entities
 # and now we're also building an entity lookup table
 tmpLabel = figerLabel.copy()
@@ -45,9 +46,9 @@ for t in figerText:
 
     # labelsThis = tmpLabel.pop(count)
     # print(labelsThis[0].split("\t")[0])
-    if ((labelsThis[0].split("\t")[0] != tokens[0]) and
-            (labelsThis[-1].split("\t")[0] != tokens[-1])):
-        print(t)
+    # if ((labelsThis[0].split("\t")[0] != tokens[0]) and
+    #         (labelsThis[-1].split("\t")[0] != tokens[-1])):
+    #     print(t)
     for label in labelsThis:
         word = label.split("\t")[0]
         tag = label.split("\t")[1]
@@ -137,12 +138,12 @@ for sent in figerText:
         # print(micro)
         # print(entsByLabel.keys())
         if micro in entsByLabel.keys():
-            print(micro)
-            print(entsByLabel.keys())
+            #print(micro)
+            #print(entsByLabel.keys())
             for ent in entsByLabel[micro]:
-                print(ent)
+                #print(ent)
                 answers.append(ent)
-            print(answers)
+            #print(answers)
             qas.append({"question": qStart + "was the " + micro + "?",
                         "id": str(questionCounter),
                         "answers": answers,
@@ -182,6 +183,7 @@ for q in figerQA['data']:
     if q["context"] not in contexts:
         contexts.append(q["context"])
 
+print("Building training splits and primary train/dev/test files")
 figer_c_tmp, figer_c_test = train_test_split(contexts,test_size=0.75, random_state=42)
 figer_c_train, figer_c_val = train_test_split(figer_c_tmp,test_size=0.5, random_state=42)
 
@@ -205,7 +207,7 @@ with open(config["output"]["figer"]["fqa_test"], 'w') as f:
 
 ### Ugh, this is a mess. Now I have to flatten the nested, and then dry the wets then wet the dries.
 
-
+print("Building shuffled training data for experiment 2")
 # do the same for train:
 trainIds = [q['id'] for q in fqa_train["data"]]
 fqa_train_gold = {'version': 'v2.0', 'data': []}
@@ -238,10 +240,10 @@ for i in trainIds:
                         }
     #fqa_train_gold["data"].append(qg[0])
     fqa_train_gold["data"].append(item)
-print(idCount)
+#print(idCount)
 
 if config["data"]["figer"]["newShuffles"] == False:
-    print("false")
+    #print("false")
     figerShufflesFile = config["data"]["figer"]["figerShuffles"]
     with open(figerShufflesFile) as fs_file:
         figerShuffles = json.loads(fs_file.read())
@@ -271,9 +273,9 @@ elif config["data"]["figer"]["newShuffles"] == True:
     #fiveNines = []
     for letter in ["a", "b", "c", "d", "e"]:
         rand = randint(1, 100)
-        print(rand)
+        #print(rand)
         nine_context_sets = partition(trainTitles, 9, rand)
-        print(str(nine_context_sets[0][0]) + "-" + str(nine_context_sets[-1][-1]))
+        #print(str(nine_context_sets[0][0]) + "-" + str(nine_context_sets[-1][-1]))
         counter = 1
         gold_array = []
         #fiveNines.append(nine_context_sets)
@@ -290,4 +292,3 @@ elif config["data"]["figer"]["newShuffles"] == True:
             with open(filename, 'w') as f:
                 json.dump(fqa_train_increment, f)
             counter += 1
-
