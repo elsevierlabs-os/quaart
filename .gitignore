@@ -3,5 +3,6 @@
 *.log
 *.bak
 .idea/
+data/
 __pycache__/
 !paper_labels.txt
