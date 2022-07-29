@@ -286,7 +286,7 @@ elif config["data"]["figer"]["newShuffles"] == True:
             # print(len(gold_array))
             # print(43*6*counter)
             fqa_train_increment = {'version': 'v2.0', 'data': gold_array}
-            filename = config["output"]["figer"]["fqa_exp"] + fqa_train_gold_"  + str(counter) + letter + ".json"
+            filename = config["output"]["figer"]["fqa_exp"] + "fqa_train_gold_"  + str(counter) + letter + ".json"
             with open(filename, 'w') as f:
                 json.dump(fqa_train_increment, f)
             counter += 1
