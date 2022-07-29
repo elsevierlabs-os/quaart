@@ -249,7 +249,7 @@ if config["data"]["figer"]["newShuffles"] == False:
         filename = config["output"]["figer"]["fqa_exp"] + "fqa_train_gold_"+k+".json"
         gold_array = []
         #print(v)
-        for title in v
+        for title in v:
             for q in fqa_train_gold["data"]:
                 if q["title"] == title:
                 # if q["title"] in v:
