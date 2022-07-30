@@ -10,8 +10,9 @@
 
     },
     "hands": {
-      "fner_texts": "data/output/fner_texts_all_test.txt",
-      "fner_labels": "data/output/fner_labels_all_test.txt",
+      "fner_types": "data/output/fner_types.txt",
+      "fner_texts": "data/output/fner_texts_all.txt",
+      "fner_labels": "data/output/fner_labels_all.txt",
       "fner_dev": "data/output/fner_dev_array.json",
       "fner_test": "data/output/fner_test_array.json",
       "wfb_all": "data/output/1k-WFB-g_complete_array.json",

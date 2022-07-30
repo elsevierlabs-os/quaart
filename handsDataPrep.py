@@ -72,6 +72,11 @@ for fn in filenames:
                 if label not in allTypes:
                     allTypes.append(label)
 
+with open(config["data"]["hands"]["fner_types"], 'w') as fp:
+    for item in allTypes:
+        # write each item on a new line
+        fp.write("%s\n" % item)
+
 print("Generating hands fner_dev data.")
 handsDev = {"version": "v2.0", "data": []}
 qCount = 1

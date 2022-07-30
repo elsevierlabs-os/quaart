@@ -12,11 +12,13 @@ nlp = spacy.load('en_core_web_sm')
 import pandas as pd
 from os.path import exists
 
+with open('config.json') as cf_file:
+    config = json.loads( cf_file.read() )
 
-with open ('fner_texts.txt', 'r') as f:
+with open (config["data"]["hands"]["fner_texts"], 'r') as f:
     figerText = f.read().splitlines()
 
-with open ('fner_labels.txt', 'r') as f:
+with open (config["data"]["hands"]["fner_labels"], 'r') as f:
     figerLabel = f.read().splitlines()
 
 parser = argparse.ArgumentParser(description='Takes model output dir and gold data')
@@ -66,7 +68,7 @@ qLookup = {}
 for q in questions['data']:
     qLookup[q['id']] = q
 
-with open ('fner_types.txt', 'r') as f:
+with open (config["data"]["hands"]["fner_types"], 'r') as f:
     figerClasses = f.read().splitlines()
 
 qMapper = {}
@@ -120,107 +122,108 @@ for thresh in thresholds:
     connl_submit = []
     figer_submit = []
     for c in figerText:
-        para = ticondict[c]
-        success_list = []
-        cleaned_list = []
-        dedupers = []
-        entities[para] = []
+        if c in ticondict.keys():
+            para = ticondict[c]
+            success_list = []
+            cleaned_list = []
+            dedupers = []
+            entities[para] = []
 
-        for k,v in nbest.items():
-            q = qLookup[k]
-            if q["title"] == para:
-                context = q["context"]
-                for index, top in enumerate(v):
-                    if top["probability"] >= thresh and top["offsets"] != [0,0]:
-                        if (top["offsets"], q["title"],  q["question"]) not in dedupers:
-                            success_list.append({"title": q["title"],
-                                                 "context": q["context"],
-                                                 "question": q["question"],
-                                                 "offsets": top["offsets"],
-                                                 "text": top["text"],
-                                                 "position": index
-                                                })
-                            cleaned_list.append({"title": q["title"],
-                                                 "context": q["context"],
-                                                 "question": q["question"],
-                                                 "offsets": top["offsets"],
-                                                 "text": top["text"],
-                                                 "position": index
-                                                })
-                            dedupers.append((top["offsets"], q["title"], q["question"]))
-        deduped = []
-        counted = {}
-        keepers = []
-        for item in success_list:
-            if item["offsets"] not in deduped:
-                deduped.append(item["offsets"])
-        for item in success_list:
-            containing = 0
-            for subitem in deduped:
-                if ((subitem[0] > item["offsets"][0] and
-                    subitem[1] <= item["offsets"][1]) or
-                    (subitem[0] >= item["offsets"][0] and
-                    subitem[1] < item["offsets"][1])):
-                    containing += 1
-            if containing <= 1:
-                if (item["offsets"][0], item["offsets"][1]) not in counted.keys():
-                    counted[(item["offsets"][0], item["offsets"][1])] = 1
+            for k,v in nbest.items():
+                q = qLookup[k]
+                if q["title"] == para:
+                    context = q["context"]
+                    for index, top in enumerate(v):
+                        if top["probability"] >= thresh and top["offsets"] != [0,0]:
+                            if (top["offsets"], q["title"],  q["question"]) not in dedupers:
+                                success_list.append({"title": q["title"],
+                                                     "context": q["context"],
+                                                     "question": q["question"],
+                                                     "offsets": top["offsets"],
+                                                     "text": top["text"],
+                                                     "position": index
+                                                    })
+                                cleaned_list.append({"title": q["title"],
+                                                     "context": q["context"],
+                                                     "question": q["question"],
+                                                     "offsets": top["offsets"],
+                                                     "text": top["text"],
+                                                     "position": index
+                                                    })
+                                dedupers.append((top["offsets"], q["title"], q["question"]))
+            deduped = []
+            counted = {}
+            keepers = []
+            for item in success_list:
+                if item["offsets"] not in deduped:
+                    deduped.append(item["offsets"])
+            for item in success_list:
+                containing = 0
+                for subitem in deduped:
+                    if ((subitem[0] > item["offsets"][0] and
+                        subitem[1] <= item["offsets"][1]) or
+                        (subitem[0] >= item["offsets"][0] and
+                        subitem[1] < item["offsets"][1])):
+                        containing += 1
+                if containing <= 1:
+                    if (item["offsets"][0], item["offsets"][1]) not in counted.keys():
+                        counted[(item["offsets"][0], item["offsets"][1])] = 1
+                    else:
+                        counted[(item["offsets"][0], item["offsets"][1])] += 1
+                elif item["offsets"] in deduped:
+                    deduped.remove(item["offsets"])
+                    cleaned_list.remove(item)
                 else:
-                    counted[(item["offsets"][0], item["offsets"][1])] += 1
-            elif item["offsets"] in deduped:
-                deduped.remove(item["offsets"])
-                cleaned_list.remove(item)
-            else:
-                cleaned_list.remove(item)
-        for item in cleaned_list:
-            containing = 0
-            itemStart = item["offsets"][0]
-            itemEnd = item["offsets"][1]
-            itemKeep = True
-            for subitem in deduped:
-                subStart = subitem[0]
-                subEnd = subitem[1]
-                if ((subStart >= itemStart and subStart <= itemEnd) or
-                    itemStart >= subStart and itemStart <= subEnd):
-                    if counted[(itemStart, itemEnd)] < counted[(subStart, subEnd)]:
-                        itemKeep = False
-                    elif itemEnd-itemStart < subEnd-subStart:
-                        itemKeep = False
-            if itemKeep == True:
-                entities[para].append(item)
-        dedupedEntities = {para: {}}
-        for entity in entities[para]:
-            if tuple(entity['offsets']) not in dedupedEntities[para]:
-                dedupedEntities[para][tuple(entity['offsets'])] = qMapper[entity["question"]]+","
-            else:
-                dedupedEntities[para][tuple(entity['offsets'])] += qMapper[entity["question"]]+","
-        connl_sub = []
-        figer_sub = []
-        nlp.tokenizer = Tokenizer(nlp.vocab, token_match=re.compile(r'\S').match)
-        tokens = nlp(context)
+                    cleaned_list.remove(item)
+            for item in cleaned_list:
+                containing = 0
+                itemStart = item["offsets"][0]
+                itemEnd = item["offsets"][1]
+                itemKeep = True
+                for subitem in deduped:
+                    subStart = subitem[0]
+                    subEnd = subitem[1]
+                    if ((subStart >= itemStart and subStart <= itemEnd) or
+                        itemStart >= subStart and itemStart <= subEnd):
+                        if counted[(itemStart, itemEnd)] < counted[(subStart, subEnd)]:
+                            itemKeep = False
+                        elif itemEnd-itemStart < subEnd-subStart:
+                            itemKeep = False
+                if itemKeep == True:
+                    entities[para].append(item)
+            dedupedEntities = {para: {}}
+            for entity in entities[para]:
+                if tuple(entity['offsets']) not in dedupedEntities[para]:
+                    dedupedEntities[para][tuple(entity['offsets'])] = qMapper[entity["question"]]+","
+                else:
+                    dedupedEntities[para][tuple(entity['offsets'])] += qMapper[entity["question"]]+","
+            connl_sub = []
+            figer_sub = []
+            nlp.tokenizer = Tokenizer(nlp.vocab, token_match=re.compile(r'\S').match)
+            tokens = nlp(context)
 
-        for token in tokens:
-            start = token.idx
-            end = token.idx+len(token.text)
-            toktyp = ("O", "")
-            for tup, typ in dedupedEntities[para].items():
-                estart = tup[0]
-                eend = tup[1]
-                if start == estart:
-                    toktyp = ("B", typ)
-                elif start >= estart and end <= eend:
-                    toktyp = ("I", typ)
-            if toktyp[0] == "B":
-                connl_sub.append("B-MISC")
-                figer_sub.append("B-"+toktyp[1])
-            elif toktyp[0] == "I":
-                connl_sub.append("I-MISC")
-                figer_sub.append("I-"+toktyp[1])
-            else:
-                connl_sub.append("O")
-                figer_sub.append("O")
-        connl_submit.append(connl_sub)
-        figer_submit.append(figer_sub)
+            for token in tokens:
+                start = token.idx
+                end = token.idx+len(token.text)
+                toktyp = ("O", "")
+                for tup, typ in dedupedEntities[para].items():
+                    estart = tup[0]
+                    eend = tup[1]
+                    if start == estart:
+                        toktyp = ("B", typ)
+                    elif start >= estart and end <= eend:
+                        toktyp = ("I", typ)
+                if toktyp[0] == "B":
+                    connl_sub.append("B-MISC")
+                    figer_sub.append("B-"+toktyp[1])
+                elif toktyp[0] == "I":
+                    connl_sub.append("I-MISC")
+                    figer_sub.append("I-"+toktyp[1])
+                else:
+                    connl_sub.append("O")
+                    figer_sub.append("O")
+            connl_submit.append(connl_sub)
+            figer_submit.append(figer_sub)
     print("## Threshold: " + str(thresh))
     f = f1_score(connl_bios, connl_submit, mode='strict', scheme=IOB2 )
     print(f)
