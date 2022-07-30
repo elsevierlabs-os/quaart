@@ -6,3 +6,4 @@
 data/
 __pycache__/
 !paper_labels.txt
+!requirements.txt
