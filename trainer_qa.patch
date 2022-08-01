@@ -1,0 +1,28 @@
+--- hugging/trainer_qa.py	2022-07-30 13:29:58.000000000 -0400
++++ hugging-akbc/trainer_qa.py	2022-07-30 13:28:07.000000000 -0400
+@@ -53,7 +53,7 @@
+             self.compute_metrics = compute_metrics
+ 
+         if self.post_process_function is not None and self.compute_metrics is not None:
+-            eval_preds = self.post_process_function(eval_examples, eval_dataset, output.predictions)
++            eval_preds, nbest = self.post_process_function(eval_examples, eval_dataset, output.predictions)
+             metrics = self.compute_metrics(eval_preds)
+ 
+             # Prefix all keys with metric_key_prefix + '_'
+@@ -94,12 +94,14 @@
+         if self.post_process_function is None or self.compute_metrics is None:
+             return output
+ 
+-        predictions = self.post_process_function(predict_examples, predict_dataset, output.predictions, "predict")
++        predictions,nbest  = self.post_process_function(predict_examples, predict_dataset, output.predictions, "predict")
++        '''
+         metrics = self.compute_metrics(predictions)
+ 
+         # Prefix all keys with metric_key_prefix + '_'
+         for key in list(metrics.keys()):
+             if not key.startswith(f"{metric_key_prefix}_"):
+                 metrics[f"{metric_key_prefix}_{key}"] = metrics.pop(key)
++        '''
++        return PredictionOutput(predictions=nbest, label_ids=predictions.label_ids, metrics=None)#metrics)
+ 
+-        return PredictionOutput(predictions=predictions.predictions, label_ids=predictions.label_ids, metrics=metrics)

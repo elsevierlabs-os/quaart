@@ -17,6 +17,12 @@ then
     cat data/output/1k-WFB-g_complete.json | jq -cs '.' > data/output/1k-WFB-g_complete_array.json
     python hands_gdown.py
     tar -xvf data/output/HAnDS_figer_types_stage_one_state_two_sentences_stage_three_pp.tar.gz -C data/output/
+    wget https://raw.githubusercontent.com/huggingface/transformers/319beb64eb5f8d1f302160d2bd5bbbc7272b8896/examples/pytorch/question-answering/run_qa.py
+    wget https://raw.githubusercontent.com/huggingface/transformers/319beb64eb5f8d1f302160d2bd5bbbc7272b8896/examples/pytorch/question-answering/utils_qa.py
+    wget https://raw.githubusercontent.com/huggingface/transformers/319beb64eb5f8d1f302160d2bd5bbbc7272b8896/examples/pytorch/question-answering/trainer_qa.py
+    patch -u run_qa.py -i run_qa.patch
+    patch -u utils_qa.py -i utils_qa.patch
+    patch -u trainer_qa.py -i trainer_qa.patch
     echo "Download complete"
 else
     echo "data/output exists - delete to redownolad"

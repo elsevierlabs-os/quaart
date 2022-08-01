@@ -1,0 +1,124 @@
+--- hugging/utils_qa.py	2022-07-30 13:30:10.000000000 -0400
++++ hugging-akbc/utils_qa.py	2022-07-30 13:27:52.000000000 -0400
+@@ -73,12 +73,10 @@
+         log_level (:obj:`int`, `optional`, defaults to ``logging.WARNING``):
+             ``logging`` log level (e.g., ``logging.WARNING``)
+     """
+-    if len(predictions) != 2:
+-        raise ValueError("`predictions` should be a tuple with two elements (start_logits, end_logits).")
++    assert len(predictions) == 2, "`predictions` should be a tuple with two elements (start_logits, end_logits)."
+     all_start_logits, all_end_logits = predictions
+ 
+-    if len(predictions[0]) != len(features):
+-        raise ValueError(f"Got {len(predictions[0])} predictions and {len(features)} features.")
++    assert len(predictions[0]) == len(features), f"Got {len(predictions[0])} predictions and {len(features)} features."
+ 
+     # Build a map example to its corresponding features.
+     example_id_to_index = {k: i for i, k in enumerate(examples["id"])}
+@@ -170,7 +168,8 @@
+         # Use the offsets to gather the answer text in the original context.
+         context = example["context"]
+         for pred in predictions:
+-            offsets = pred.pop("offsets")
++            offsets = pred["offsets"]
++            #offsets = pred.pop("offsets")
+             pred["text"] = context[offsets[0] : offsets[1]]
+ 
+         # In the very rare edge case we have not a single non-null prediction, we create a fake prediction to avoid
+@@ -194,8 +193,12 @@
+         else:
+             # Otherwise we first need to find the best non-empty prediction.
+             i = 0
+-            while predictions[i]["text"] == "":
++            while i!=len(predictions) and predictions[i]["text"] == "":
+                 i += 1
++            if i==len(predictions):
++                predictions.append( {"text": "empty", "start_logit": 0.0, "end_logit": 0.0, "score": 0.0})
++                i=len(predictions)-1
++
+             best_non_null_pred = predictions[i]
+ 
+             # Then we compare to the null prediction using the threshold.
+@@ -214,8 +217,7 @@
+ 
+     # If we have an output_dir, let's save all those dicts.
+     if output_dir is not None:
+-        if not os.path.isdir(output_dir):
+-            raise EnvironmentError(f"{output_dir} is not a directory.")
++        assert os.path.isdir(output_dir), f"{output_dir} is not a directory."
+ 
+         prediction_file = os.path.join(
+             output_dir, "predictions.json" if prefix is None else f"{prefix}_predictions.json"
+@@ -239,7 +241,7 @@
+             with open(null_odds_file, "w") as writer:
+                 writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
+ 
+-    return all_predictions
++    return all_predictions,all_nbest_json
+ 
+ 
+ def postprocess_qa_predictions_with_beam_search(
+@@ -286,18 +288,20 @@
+         log_level (:obj:`int`, `optional`, defaults to ``logging.WARNING``):
+             ``logging`` log level (e.g., ``logging.WARNING``)
+     """
+-    if len(predictions) != 5:
+-        raise ValueError("`predictions` should be a tuple with five elements.")
++    assert len(predictions) == 5, "`predictions` should be a tuple with five elements."
+     start_top_log_probs, start_top_index, end_top_log_probs, end_top_index, cls_logits = predictions
+ 
+-    if len(predictions[0]) != len(features):
+-        raise ValueError(f"Got {len(predictions[0])} predictions and {len(features)} features.")
++    assert len(predictions[0]) == len(
++        features
++    ), f"Got {len(predictions[0])} predicitions and {len(features)} features."
+ 
+     # Build a map example to its corresponding features.
+     example_id_to_index = {k: i for i, k in enumerate(examples["id"])}
++    print(len(example_id_to_index))
+     features_per_example = collections.defaultdict(list)
+     for i, feature in enumerate(features):
+         features_per_example[example_id_to_index[feature["example_id"]]].append(i)
++    print(len(features_per_example))
+ 
+     # The dictionaries we have to fill.
+     all_predictions = collections.OrderedDict()
+@@ -372,7 +376,8 @@
+         # Use the offsets to gather the answer text in the original context.
+         context = example["context"]
+         for pred in predictions:
+-            offsets = pred.pop("offsets")
++            offsets = pred["offsets"]
++            #offsets = pred.pop("offsets")
+             pred["text"] = context[offsets[0] : offsets[1]]
+ 
+         # In the very rare edge case we have not a single non-null prediction, we create a fake prediction to avoid
+@@ -393,6 +398,11 @@
+         # Pick the best prediction and set the probability for the null answer.
+         all_predictions[example["id"]] = predictions[0]["text"]
+         if version_2_with_negative:
++            if min_null_score is None:
++                print(example)
++                print(example_index)
++                print(feature_indices)
++
+             scores_diff_json[example["id"]] = float(min_null_score)
+ 
+         # Make `predictions` JSON-serializable by casting np.float back to float.
+@@ -403,8 +413,7 @@
+ 
+     # If we have an output_dir, let's save all those dicts.
+     if output_dir is not None:
+-        if not os.path.isdir(output_dir):
+-            raise EnvironmentError(f"{output_dir} is not a directory.")
++        assert os.path.isdir(output_dir), f"{output_dir} is not a directory."
+ 
+         prediction_file = os.path.join(
+             output_dir, "predictions.json" if prefix is None else f"{prefix}_predictions.json"
+@@ -428,4 +437,5 @@
+             with open(null_odds_file, "w") as writer:
+                 writer.write(json.dumps(scores_diff_json, indent=4) + "\n")
+ 
+-    return all_predictions, scores_diff_json
++    return all_predictions, all_nbest_json, scores_diff_json
++
