@@ -18,7 +18,6 @@ with open(config["data"]["hands"]["fner_test"], 'r') as json_file:
 with open(config["data"]["hands"]["wfb_all"], 'r') as json_file:
     wfb_all = json.load(json_file)
 
-filenames = []
 trainpath = config["data"]["hands"]["trainpath"]
 
 print("Processing HAnDS data")
@@ -55,9 +54,15 @@ with open(config["data"]["hands"]["fner_labels"], 'w') as fp:
         fp.write("%s\n" % item)
 
 print("Building type list from all training data -- this will take a while.")
-for dirname in os.listdir(trainpath):
-    for fn in os.listdir(trainpath + "/" + dirname):
-        filenames.append(trainpath+"/"+dirname+"/"+fn)
+with open(config["data"]["hands"]["filenamearray"]) as fs_file:
+    filenames_temp = json.loads(fs_file.read())
+filenames = [f.replace("/Users/harperco/projects/fine-grained/HAnDS/datasets/", "data/output/") for f in filenames_temp]
+# filenames = []
+# for dirname in os.listdir(trainpath):
+#     print(dirname)
+#     for fn in os.listdir(trainpath + "/" + dirname):
+#         print(fn)
+#         filenames.append(trainpath+"/"+dirname+"/"+fn)
 
 
 allTypes = []
@@ -230,7 +235,7 @@ for fn in hands_f_train:
         pidsiddid = (result["pid"], result["sid"], result["did"])
         train_f_pidsiddids.append(pidsiddid)
 
-hands_c_train, hands_c_test = train_test_split(train_f_pidsiddids,test_size=0.9995, random_state=42)
+hands_c_train, hands_c_test = train_test_split(train_f_pidsiddids,test_size=0.9995, random_state=randseed)
 #print(len(hands_c_train))
 
 filecount = 0

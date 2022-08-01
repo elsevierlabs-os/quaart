@@ -3,7 +3,7 @@
 *.log
 *.bak
 .idea/
-data/
+data/output/
 __pycache__/
 !paper_labels.txt
 !requirements.txt
