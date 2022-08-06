@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Installing spacy vocab"
+python -m spacy download en_core_web_sm
+
 if [ ! -d "data/output" ]
 then
     echo "Building directory structure and downloading data"

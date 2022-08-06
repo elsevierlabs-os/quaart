@@ -339,13 +339,13 @@ for thresh in thresholds:
         print(utils.loose_macro(allTypeList))
         a_l_mic_p, a_l_mic_r, a_l_mic_f = utils.loose_micro(allTypeList)
         print(utils.loose_micro(allTypeList))
-#         else:
-#             a_s_p, s_r, s_f = 0,0,0
-#             #print(strict(allTypeList))
-#             l_mac_p, l_mac_r, l_mac_f = 0,0,0
-#             #print(loose_macro(allTypeList))
-#             l_mic_p, l_mic_r, l_mic_f = 0,0,0
-#             #print(loose_micro(allTypeList))
+    else:
+        a_s_p, a_s_r, a_s_f = 0,0,0
+        #print(strict(allTypeList))
+        a_l_mac_p, a_l_mac_r, a_l_mac_f = 0,0,0
+        #print(loose_macro(allTypeList))
+        a_l_mic_p, a_l_mic_r, a_l_mic_f = 0,0,0
+        #print(loose_micro(allTypeList))
 
     strict_p.append(s_p)
     loose_micro_p.append(l_mic_p)

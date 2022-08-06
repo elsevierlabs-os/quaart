@@ -16,7 +16,7 @@ for i in {1..9};
 do
   for l in ${letters[@]};
   do
-    python run_qa.py --model_name_or_path "deepset/roberta-base-squad2" --train_file data/output/fqa_train/fqa_train_gold_$i$l.json --do_train --version_2_with_negative --output_dir figer/train/roberta-fqaretrain_$i$l --overwrite_output_dir --max_seq_length 512 2>&1 | tee figer/train/figertrain_$i$l.log
+    python run_qa.py --model_name_or_path "deepset/roberta-base-squad2" --train_file data/output/fqa_train/fqa_train_gold_$i$l.json --do_train --version_2_with_negative --output_dir figer/train/roberta-fqaretrain_$i$l --overwrite_output_dir --overwrite_cache --max_seq_length 512 2>&1 | tee figer/train/figertrain_$i$l.log
   done;
 done
 

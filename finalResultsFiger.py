@@ -10,9 +10,9 @@ import json
 import pandas as pd
 args = parser.parse_args()
 test_df = pd.read_csv(args.prefix + ".csv", index_col=0)
-test_df["dev_test"] = test_df.apply (lambda x: x["model name"].split("_")[2], axis = 1)
+test_df["dev_test"] = test_df.apply (lambda x: x["model name"].split("_")[1], axis = 1)
 test_df["model name"] = test_df.apply (lambda x: x["model name"].split(":")[0], axis = 1)
-test_df["Model Number"] =  test_df["model name"].str.extract('_([0-9][abc])_')#.astype(float)
+test_df["Model Number"] =  test_df["model name"].str.extract('_([0-9][abc])')#.astype(float)
 
 models = list(set(test_df["model name"]))
 
@@ -36,14 +36,16 @@ top_per_model = pd.DataFrame(columns=test_df.columns)
 for model in models:
     tmp_df = test_df.loc[test_df["model name"] == model]
     top_df = tmp_df[tmp_df["connl f1"] == tmp_df["connl f1"].max()]
+    if top_df.shape[0] > 1:
+        top_df = top_df.head(1)
     top_per_model = top_per_model.append(top_df, ignore_index=True)
 
-dev_thresholds = top_per_model.loc[top_per_model["dev_test"] == "fqadev112"][["model name", "thesholds"]]
-dev_thresholds["Model Number"] = dev_thresholds["model name"].str.extract('_([0-9][abc])_')#.astype(float)
+dev_thresholds = top_per_model.loc[top_per_model["dev_test"] == "fqadev"][["model name", "thesholds"]]
+dev_thresholds["Model Number"] = dev_thresholds["model name"].str.extract('_([0-9][abc])')#.astype(float)
 
 withDevThresh = test_df.merge(dev_thresholds.rename(columns={"thesholds": 'dev thresholds'}), on=["Model Number"])
 
-top_per_model_test = withDevThresh.loc[withDevThresh["dev_test"] == "fqatest112"].loc[withDevThresh["thesholds"] == withDevThresh["dev thresholds"]]
+top_per_model_test = withDevThresh.loc[withDevThresh["dev_test"] == "fqatest"].loc[withDevThresh["thesholds"] == withDevThresh["dev thresholds"]]
 top_with_counts = top_per_model_test.merge(count_df, on=["Model Number"])
 
 print("Figer Connl F1 Max: " + str(top_with_counts.loc[top_with_counts["EvalSet"] == "figer"]["connl f1"].max()))
