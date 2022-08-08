@@ -26,10 +26,9 @@ then
     patch -u run_qa.py -i run_qa.patch
     patch -u utils_qa.py -i utils_qa.patch
     patch -u trainer_qa.py -i trainer_qa.patch
-    echo "Download complete"
+    echo "Download complete, building derivative data"
+    python figerDataPrep.py
+    python handsDataPrep.py
 else
-    echo "data/output exists - delete to redownolad"
+    echo "data/output exists - delete to redownload"
 fi
-
-python figerDataPrep.py
-python handsDataPrep.py
