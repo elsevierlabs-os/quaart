@@ -9,7 +9,7 @@ Code is designed to provide generally comparable results to those described in t
 
 Code runs best on a GPU box and requires at least 350GB of available storage for building datasets and trainng models.
 
-We are using Python 3, Pandas, SpaCY, and SeqEval in our evaluation scripts, and sklearn and gdown in the collection and processing of training data. We presently are using very specific versions of Huggingface Transformers and Datasets, as well as PyTorch. These are documented in the requirements.txt file.
+We are using Python 3, Pandas, SpaCY, and SeqEval in our evaluation scripts, and sklearn and gdown in the collection and processing of training data. We presently are using very specific versions of Huggingface Transformers and Datasets, as well as PyTorch. These are documented in the requirements.txt file. Additionally, preliminary data creation steps currently require jq.
 
 
 To install necessary libraries, set up a virtual environment of your choice and run `pip install -r requirements.txt` from the root of your QuAART clone.
